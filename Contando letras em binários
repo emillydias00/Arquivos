@@ -1,0 +1,47 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int contar_letra_a_em_arquivo(const char *nome_arquivo) {
+    FILE *arquivo;
+    char byte;
+    int contador_a = 0;
+
+    // Abre o arquivo para leitura em modo binário
+    arquivo = fopen(nome_arquivo, "rb");
+
+    if (arquivo == NULL) {
+        printf("Erro: Não foi possível abrir o arquivo '%s'.\n", nome_arquivo);
+        return -1; // Retorna -1 para indicar erro
+    }
+
+    // Lê byte por byte e conta as letras 'a'
+    while (fread(&byte, 1, 1, arquivo)) {
+        if (byte == 'a') {
+            contador_a++;
+        }
+    }
+
+    // Fecha o arquivo
+    fclose(arquivo);
+
+    return contador_a;
+}
+
+int main() {
+    char nome_arquivo[100];
+    int quantidade_a;
+
+    // Solicita o nome do arquivo ao usuário
+    printf("Digite o nome do arquivo binário: ");
+    scanf("%s", nome_arquivo);
+
+    // Chama a função para contar as letras 'a' no arquivo
+    quantidade_a = contar_letra_a_em_arquivo(nome_arquivo);
+
+    // Exibe o resultado se não houve erro
+    if (quantidade_a != -1) {
+        printf("A letra 'a' aparece %d vezes no arquivo '%s'.\n", quantidade_a, nome_arquivo);
+    }
+
+    return 0;
+}
