@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define N 5 // Tamanho das matrizes
+
+void gerar_arquivo_binario(const char *nome_arquivo) {
+    FILE *arquivo;
+    int matriz1[N][N], matriz2[N][N];
+    int i, j;
+
+    // Abrindo arquivo para escrita em modo binário
+    arquivo = fopen(nome_arquivo, "wb");
+
+    if (arquivo == NULL) {
+        printf("Erro: Não foi possível criar o arquivo '%s'.\n", nome_arquivo);
+        return;
+    }
+
+    // Preenchendo as matrizes com números aleatórios entre 1 e 10
+    srand(time(NULL)); // Inicializa o gerador de números aleatórios
+
+    // Preenche matriz1
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < N; j++) {
+            matriz1[i][j] = rand() % 10 + 1; // Números aleatórios entre 1 e 10
+        }
+    }
+
+    // Preenche matriz2
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < N; j++) {
+            matriz2[i][j] = rand() % 10 + 1; // Números aleatórios entre 1 e 10
+        }
+    }
+
+    // Escrevendo as matrizes no arquivo
+    fwrite(matriz1, sizeof(int), N*N, arquivo);
+    fwrite(matriz2, sizeof(int), N*N, arquivo);
+
+    // Fechando o arquivo
+    fclose(arquivo);
+
+    printf("Matrizes geradas e escritas no arquivo '%s'.\n", nome_arquivo);
+}
+
+int main() {
+    char nome_arquivo[100];
+
+    // Solicita o nome do arquivo ao usuário
+    printf("Digite o nome do arquivo binário para salvar as matrizes: ");
+    scanf("%s", nome_arquivo);
+
+    // Chama a função para gerar o arquivo binário com as matrizes
+    gerar_arquivo_binario(nome_arquivo);
+
+    return 0;
+}
