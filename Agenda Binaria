@@ -1,0 +1,198 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_CONTATOS 100
+#define TAM_NOME 51 // 50 caracteres + '\0'
+#define TAM_TELEFONE 21 // 20 caracteres + '\0'
+
+// Estrutura para armazenar um contato
+typedef struct {
+    char nome[TAM_NOME];
+    int idade;
+    char telefone[TAM_TELEFONE];
+} Contato;
+
+// Função para inserir um contato na agenda
+void inserir_contato(Contato agenda[], int *num_contatos) {
+    if (*num_contatos >= MAX_CONTATOS) {
+        printf("Espaco insuficiente na agenda.\n");
+        return;
+    }
+
+    Contato novo_contato;
+
+    printf("Digite o nome do contato (max 50 caracteres): ");
+    scanf(" %[^\n]", novo_contato.nome);
+
+    printf("Digite a idade do contato: ");
+    scanf("%d", &novo_contato.idade);
+
+    printf("Digite o telefone do contato (max 20 caracteres): ");
+    scanf(" %[^\n]", novo_contato.telefone);
+
+    agenda[*num_contatos] = novo_contato;
+    (*num_contatos)++;
+
+    printf("Registro %s %d %s inserido.\n", novo_contato.nome, novo_contato.idade, novo_contato.telefone);
+}
+
+// Função para alterar um contato na agenda
+void alterar_contato(Contato agenda[], int num_contatos) {
+    char nome_alterar[TAM_NOME];
+    int i;
+
+    printf("Digite o nome do contato que deseja alterar: ");
+    scanf(" %[^\n]", nome_alterar);
+
+    for (i = 0; i < num_contatos; i++) {
+        if (strcmp(agenda[i].nome, nome_alterar) == 0) {
+            printf("Digite a nova idade do contato: ");
+            scanf("%d", &agenda[i].idade);
+
+            printf("Digite o novo telefone do contato (max 20 caracteres): ");
+            scanf(" %[^\n]", agenda[i].telefone);
+
+            printf("Registro %s %d %s alterado.\n", agenda[i].nome, agenda[i].idade, agenda[i].telefone);
+            return;
+        }
+    }
+
+    printf("Registro %s nao encontrado para alteracao.\n", nome_alterar);
+}
+
+// Função para excluir um contato da agenda
+void excluir_contato(Contato agenda[], int *num_contatos) {
+    char nome_excluir[TAM_NOME];
+    int i, j;
+
+    printf("Digite o nome do contato que deseja excluir: ");
+    scanf(" %[^\n]", nome_excluir);
+
+    for (i = 0; i < *num_contatos; i++) {
+        if (strcmp(agenda[i].nome, nome_excluir) == 0) {
+            printf("Registro %s %d %s excluido.\n", agenda[i].nome, agenda[i].idade, agenda[i].telefone);
+
+            // Remover o contato movendo os outros elementos para frente
+            for (j = i; j < *num_contatos - 1; j++) {
+                agenda[j] = agenda[j + 1];
+            }
+            (*num_contatos)--;
+            return;
+        }
+    }
+
+    printf("Registro %s nao encontrado para exclusao.\n", nome_excluir);
+}
+
+// Função para exibir um contato da agenda
+void exibir_contato(Contato agenda[], int num_contatos) {
+    char nome_exibir[TAM_NOME];
+    int i;
+
+    printf("Digite o nome do contato que deseja exibir: ");
+    scanf(" %[^\n]", nome_exibir);
+
+    for (i = 0; i < num_contatos; i++) {
+        if (strcmp(agenda[i].nome, nome_exibir) == 0) {
+            printf("Registro %s %d %s exibido.\n", agenda[i].nome, agenda[i].idade, agenda[i].telefone);
+            return;
+        }
+    }
+
+    printf("Registro %s nao encontrado para exibicao.\n", nome_exibir);
+}
+
+// Função para salvar a agenda em um arquivo binário
+void salvar_agenda(const char *nome_arquivo, Contato agenda[], int num_contatos) {
+    FILE *arquivo;
+    int i;
+
+    arquivo = fopen(nome_arquivo, "wb");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo %s.\n", nome_arquivo);
+        return;
+    }
+
+    fwrite(&num_contatos, sizeof(int), 1, arquivo); // Escreve o número de contatos primeiro
+
+    // Escreve cada contato no arquivo
+    for (i = 0; i < num_contatos; i++) {
+        fwrite(&agenda[i], sizeof(Contato), 1, arquivo);
+    }
+
+    fclose(arquivo);
+}
+
+// Função para carregar a agenda de um arquivo binário
+int carregar_agenda(const char *nome_arquivo, Contato agenda[]) {
+    FILE *arquivo;
+    int num_contatos, i;
+
+    arquivo = fopen(nome_arquivo, "rb");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo %s.\n", nome_arquivo);
+        return 0;
+    }
+
+    fread(&num_contatos, sizeof(int), 1, arquivo); // Lê o número de contatos
+
+    // Lê cada contato do arquivo
+    for (i = 0; i < num_contatos; i++) {
+        fread(&agenda[i], sizeof(Contato), 1, arquivo);
+    }
+
+    fclose(arquivo);
+
+    return num_contatos;
+}
+
+int main() {
+    Contato agenda[MAX_CONTATOS];
+    int num_contatos = 0;
+    char nome_arquivo[100];
+    int opcao;
+
+    printf("Digite o nome do arquivo da agenda: ");
+    scanf(" %[^\n]", nome_arquivo);
+
+    // Carregar agenda do arquivo, se existir
+    num_contatos = carregar_agenda(nome_arquivo, agenda);
+
+    do {
+        printf("\nOpcoes:\n");
+        printf("1 - Inserir Contato\n");
+        printf("2 - Alterar Contato\n");
+        printf("3 - Excluir Contato\n");
+        printf("4 - Exibir Contato\n");
+        printf("0 - Sair\n");
+        printf("Digite sua opcao: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                inserir_contato(agenda, &num_contatos);
+                break;
+            case 2:
+                alterar_contato(agenda, num_contatos);
+                break;
+            case 3:
+                excluir_contato(agenda, &num_contatos);
+                break;
+            case 4:
+                exibir_contato(agenda, num_contatos);
+                break;
+            case 0:
+                printf("Saindo do programa.\n");
+                break;
+            default:
+                printf("Opcao invalida. Tente novamente.\n");
+        }
+
+        // Salvar a agenda de volta no arquivo após cada operação
+        salvar_agenda(nome_arquivo, agenda, num_contatos);
+
+    } while (opcao != 0);
+
+    return 0;
+}
